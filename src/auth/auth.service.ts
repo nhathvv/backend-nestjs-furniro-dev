@@ -62,8 +62,8 @@ export class AuthService {
     };
   }
   async register(registerDto: registerUserDTO) {
-    // const email_verify_token = await this.signEmailVerifyToken({ email: registerDto.email });
-    // registerDto.email_verify_token = email_verify_token;
+    const email_verify_token = await this.signEmailVerifyToken({ email: registerDto.email });
+    registerDto.email_verify_token = email_verify_token;
     return this.usersService.create(registerDto);
   }
   async logout(user: IUser, res: Response) {

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ResponeMessage } from 'src/decorator/customize';
 
 @Controller('users')
 export class UsersController {
@@ -30,5 +31,11 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+
+  @Post('/verify-email')
+  @ResponeMessage('Verify email')
+  async handleVerifyEmail(@Body('email_verify_token') email_verify_token: string) {
+    return this.usersService.verifyEmail(email_verify_token);
   }
 }

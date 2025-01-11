@@ -17,6 +17,8 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   password: string;
+
+  email_verify_token?: string;
 }
 export class registerUserDTO {
   @IsNotEmpty()

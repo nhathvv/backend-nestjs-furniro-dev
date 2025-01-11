@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './schemas/user.schema';
+import { User, UserDocument, UserVerifyStatus } from './schemas/user.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { ConfigService } from '@nestjs/config';
 import { genSaltSync, hashSync } from 'bcrypt';
@@ -26,6 +26,7 @@ export class UsersService {
     if (isUsernameExist) {
       throw new BadRequestException('Username already exist');
     }
+    await this.mailService.sendEmailVerify(createUserDto, createUserDto.email_verify_token);
     const result = await this.userModel.create({
       ...createUserDto,
       password: this.hashPassword(createUserDto.password)
@@ -35,6 +36,13 @@ export class UsersService {
       _id: result._id,
       createdAt: result.createdAt,
     }
+  }
+  async verifyEmail(email_verify_token: string) {
+    const user = await this.userModel.findOne({ email_verify_token });
+    if (!user) {
+      throw new BadRequestException('Email verify token is invalid');
+    }
+    return await this.userModel.updateOne({ email_verify_token }, { email_verify_token: '', verified: UserVerifyStatus.Verified });
   }
   findOneByUsername(username: string) {
     return this.userModel.findOne({ username })
