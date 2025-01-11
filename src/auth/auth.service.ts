@@ -5,6 +5,7 @@ import { Response } from 'express';
 import ms from 'ms';
 import { MailService } from 'src/mail/mail.service';
 import { registerUserDTO } from 'src/users/dto/create-user.dto';
+import { UserVerifyStatus } from 'src/users/schemas/user.schema';
 import { IUser } from 'src/users/users.interface';
 import { UsersService } from 'src/users/users.service';
 @Injectable()
@@ -52,6 +53,9 @@ export class AuthService {
       httpOnly: true,
       maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN')),
     });
+    if (user.verified !== UserVerifyStatus.Verified) {
+      throw new BadRequestException('Please verify your email first');
+    }
     return {
       access_token: this.jwtService.sign(payload),
       user: {
