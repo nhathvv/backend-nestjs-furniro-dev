@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -22,7 +23,8 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
     }),
     UsersModule,
-    AuthModule,],
+    AuthModule,
+    MailModule,],
   controllers: [AppController],
   providers: [AppService],
 })

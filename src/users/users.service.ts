@@ -6,13 +6,17 @@ import { User, UserDocument } from './schemas/user.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { ConfigService } from '@nestjs/config';
 import { genSaltSync, hashSync } from 'bcrypt';
-import { isMongoId } from 'class-validator';
+import { JwtService } from '@nestjs/jwt';
+import { MailService } from 'src/mail/mail.service';
 @Injectable()
 export class UsersService {
   @InjectModel(User.name)
   private userModel: SoftDeleteModel<UserDocument>;
-  private configService: ConfigService
+  constructor(
+    private configService: ConfigService,
+    private mailService: MailService,
 
+  ) { }
   async create(createUserDto: CreateUserDto) {
     const isEmailExist = await this.userModel.findOne({ email: createUserDto.email });
     if (isEmailExist) {
@@ -26,6 +30,7 @@ export class UsersService {
       ...createUserDto,
       password: this.hashPassword(createUserDto.password)
     })
+
     return {
       _id: result._id,
       createdAt: result.createdAt,

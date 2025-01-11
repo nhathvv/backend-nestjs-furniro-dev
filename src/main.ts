@@ -9,6 +9,13 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   const configService = app.get(ConfigService);
   app.use(cookieParser());
+  app.enableCors({
+    origin: true,
+    methods: 'GET,POST,PUT,PATCH,DELETE,HEAD',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true,
+  });
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
   const port = configService.get('PORT');

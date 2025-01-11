@@ -36,4 +36,6 @@ export class registerUserDTO {
 
   @IsNotEmpty()
   password: string;
+
+  email_verify_token?: string;
 }

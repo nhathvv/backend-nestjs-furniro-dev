@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import ms from 'ms';
+import { MailService } from 'src/mail/mail.service';
 import { registerUserDTO } from 'src/users/dto/create-user.dto';
 import { IUser } from 'src/users/users.interface';
 import { UsersService } from 'src/users/users.service';
@@ -11,7 +12,8 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private mailService: MailService
   ) { }
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOneByUsername(username);
@@ -28,6 +30,13 @@ export class AuthService {
       expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
     });
   }
+  signEmailVerifyToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_EMAIL_VERIFY_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_EMAIL_VERIFY_EXPIRESIN'),
+    });
+  }
+
   async login(user: IUser, @Res({ passthrough: true }) response: Response) {
     const { _id, username, email } = user;
     const payload = {
@@ -53,7 +62,8 @@ export class AuthService {
     };
   }
   async register(registerDto: registerUserDTO) {
-    console.log(registerDto);
+    // const email_verify_token = await this.signEmailVerifyToken({ email: registerDto.email });
+    // registerDto.email_verify_token = email_verify_token;
     return this.usersService.create(registerDto);
   }
   async logout(user: IUser, res: Response) {
