@@ -1,4 +1,4 @@
-import { Injectable, Res } from '@nestjs/common';
+import { BadRequestException, Injectable, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
@@ -46,14 +46,54 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       user: {
-        _id: user._id,
-        email: user.email,
-        username: user.username,
+        _id,
+        email,
+        username,
       }
     };
   }
   async register(registerDto: registerUserDTO) {
     console.log(registerDto);
     return this.usersService.create(registerDto);
+  }
+  async logout(user: IUser, res: Response) {
+    res.clearCookie('refresh_token');
+    return this.usersService.updateRefreshToken(user._id, '');
+  }
+  async getNewAccessToken(refresh_token: string, res: Response) {
+    try {
+      await this.jwtService.verifyAsync(refresh_token, {
+        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET')
+      })
+      const user = await this.usersService.findOneByRefreshToken(refresh_token);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+      const { _id, username, email } = user;
+      const payload = {
+        sub: 'Token Login',
+        iss: 'From server',
+        _id,
+        username,
+        email
+      }
+      const new_refresh_token = this.signRefreshToken(payload);
+      await this.usersService.updateRefreshToken(_id.toString(), new_refresh_token);
+      res.cookie('refresh_token', new_refresh_token, {
+        httpOnly: true,
+        maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN')),
+      });
+      return {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          _id,
+          email,
+          username,
+        }
+      };
+    } catch (error) {
+      throw new BadRequestException('Invalid refresh token. Flease login again!!');
+    }
+
   }
 }

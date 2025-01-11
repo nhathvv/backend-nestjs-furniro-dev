@@ -41,6 +41,9 @@ export class UsersService {
     const salt = genSaltSync(10);
     return hashSync(password, salt);
   }
+  async findOneByRefreshToken(refresh_token: string) {
+    return this.userModel.findOne({ refresh_token });
+  }
   findAll() {
     return `This action returns all users`;
   }

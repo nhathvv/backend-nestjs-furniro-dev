@@ -33,4 +33,20 @@ export class AuthController {
   async register(@Body() registerUserDTO: registerUserDTO) {
     return this.authService.register(registerUserDTO);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/logout')
+  @ResponeMessage('Logout successfully!')
+  async handleLogout(@User() user: IUser, @Res({ passthrough: true }) res: Response) {
+    return this.authService.logout(user, res);
+  }
+
+  @Post('/refresh-token')
+  @Public()
+  @ResponeMessage('Get user by refresh token')
+  async getNewAccessToken(@Request() req, @Res({ passthrough: true }) res: Response) {
+    const refresh_token = req.cookies['refresh_token'];
+    return this.authService.getNewAccessToken(refresh_token, res);
+  }
+
 }
