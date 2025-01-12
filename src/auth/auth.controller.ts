@@ -68,7 +68,7 @@ export class AuthController {
 
   @Post('/verify-reset-password')
   @Public()
-  @ResponeMessage('Reset password')
+  @ResponeMessage('Password has been successfully reset.')
   async handleVerifyForgotPasswod(@Body('forgot_password_token') forgot_password_token: string, @Body('password') password: string) {
     return this.authService.resetPassword(forgot_password_token, password);
   }

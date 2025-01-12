@@ -67,7 +67,8 @@ export class UsersService {
   }
 
   isValidPassword(password: string, hash: string) {
-    return hashSync(password, hash)
+    console.log(password, hash);
+    return hashSync(password, hash) || false;
   }
 
   async forgotPassword(email: string, forgot_password_token: string) {
