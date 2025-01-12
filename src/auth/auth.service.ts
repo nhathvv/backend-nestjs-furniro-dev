@@ -79,7 +79,8 @@ export class AuthService {
         _id,
         email,
         username,
-      }
+      },
+      refresh_token,
     };
   }
 
@@ -123,7 +124,8 @@ export class AuthService {
           _id,
           email,
           username,
-        }
+        },
+        refresh_token: new_refresh_token,
       };
     } catch (error) {
       throw new BadRequestException('Invalid refresh token. Flease login again!!');
