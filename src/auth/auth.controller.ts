@@ -58,4 +58,19 @@ export class AuthController {
   async handleVerifyEmail(@Body('email_verify_token') email_verify_token: string) {
     return this.authService.verifyEmail(email_verify_token);
   }
+
+  @Post('/forgot-password')
+  @Public()
+  @ResponeMessage('Forgot password')
+  async handleForgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Post('/verify-reset-password')
+  @Public()
+  @ResponeMessage('Reset password')
+  async handleVerifyForgotPasswod(@Body('forgot_password_token') forgot_password_token: string, @Body('password') password: string) {
+    return this.authService.resetPassword(forgot_password_token, password);
+  }
+
 }

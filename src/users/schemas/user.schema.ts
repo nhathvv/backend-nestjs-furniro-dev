@@ -51,7 +51,7 @@ export class User {
   @Prop()
   username: string;
 
-  @Prop()
+  @Prop({ default: "" })
   forgot_password_token: string;
 
   @Prop({ type: 'number', enum: UserVerifyStatus, default: 0 })
@@ -60,7 +60,7 @@ export class User {
   @Prop({ default: "" })
   refresh_token: string;
 
-  @Prop({ default: "" })
+  @Prop()
   deletedAt: Date;
 
   @Prop()

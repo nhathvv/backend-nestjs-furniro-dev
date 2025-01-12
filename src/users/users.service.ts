@@ -41,12 +41,15 @@ export class UsersService {
   findOneByUsername(username: string) {
     return this.userModel.findOne({ username })
   }
+
   findOneByEmail(email: string) {
     return this.userModel.findOne({ email })
   }
+
   async findOneByRefreshToken(refresh_token: string) {
     return this.userModel.findOne({ refresh_token });
   }
+
   async verifyEmail(email_verify_token: string) {
     const user = await this.userModel.findOne({ email_verify_token });
     if (!user) {
@@ -54,9 +57,28 @@ export class UsersService {
     }
     return await this.userModel.updateOne({ email_verify_token }, { email_verify_token: '', verified: UserVerifyStatus.Verified });
   }
+  async resetPassword(forgot_password_token: string, password: string) {
+    const user = await this.userModel.findOne({ forgot_password_token });
+    if (!user) {
+      throw new BadRequestException('Forgot password token is invalid');
+    }
+    return await this.userModel.updateOne({ forgot_password_token }, { forgot_password_token: '', password: this.hashPassword(password) });
+
+  }
+
   isValidPassword(password: string, hash: string) {
     return hashSync(password, hash)
   }
+
+  async forgotPassword(email: string, forgot_password_token: string) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException('Email not found');
+    }
+    await this.userModel.updateOne({ email }, { forgot_password_token });
+    return this.mailService.sendEmailForgotPassword(user, forgot_password_token);
+  }
+
   hashPassword(password: string) {
     const salt = genSaltSync(10);
     return hashSync(password, salt);

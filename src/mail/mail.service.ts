@@ -6,9 +6,9 @@ export class MailService {
   constructor(
     private readonly mailerService: MailerService,
   ) { }
+
   async sendEmailVerify(user: any, email_verify_token: string) {
     const url = `http://localhost:3000/auth/confirm?email_veriy_token=${email_verify_token}`;
-    console.log(url);
     return await this.mailerService.sendMail({
       to: user.email, // list of receivers
       from: '"Furniro.dev" <support@example.com>', // override default from
@@ -20,4 +20,19 @@ export class MailService {
       },
     });
   }
+
+  async sendEmailForgotPassword(user: any, forgot_password_token: string) {
+    const url = `http://localhost:3000/auth/confirm?forgot_password_token=${forgot_password_token}`;
+    return await this.mailerService.sendMail({
+      to: user.email, // list of receivers
+      from: '"Furniro.dev" <support@example.com>', // override default from
+      subject: 'Reset Your Password - Furniro Dev',
+      template: './forgot-password', // `.hbs` extension is appended automatically
+      context: { // ✏️ filling curly brackets with content
+        name: user.username,
+        url
+      },
+    });
+  }
+
 }

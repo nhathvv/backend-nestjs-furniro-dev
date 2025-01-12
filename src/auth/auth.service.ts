@@ -8,6 +8,7 @@ import { registerUserDTO } from 'src/users/dto/create-user.dto';
 import { UserVerifyStatus } from 'src/users/schemas/user.schema';
 import { IUser } from 'src/users/users.interface';
 import { UsersService } from 'src/users/users.service';
+import { convertExpiresInToDate } from 'src/utils/common';
 @Injectable()
 export class AuthService {
   constructor(
@@ -38,6 +39,13 @@ export class AuthService {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_EMAIL_VERIFY_SECRET'),
       expiresIn: this.configService.get<string>('JWT_EMAIL_VERIFY_EXPIRESIN'),
+    });
+  }
+
+  signForgotPasswordToken(payload: any) {
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_FORGOT_PASSWORD_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_FORGOT_PASSWORD_EXPIRESIN'),
     });
   }
 
@@ -119,6 +127,35 @@ export class AuthService {
   }
 
   async verifyEmail(email_verify_token: string) {
-    return this.usersService.verifyEmail(email_verify_token);
+    try {
+      const result = await this.jwtService.verify(email_verify_token, {
+        secret: this.configService.get<string>('JWT_EMAIL_VERIFY_SECRET')
+      });
+      const day = new Date();
+      if (convertExpiresInToDate(result.exp).getTime() < day.getTime()) {
+        throw new BadRequestException('Token is expired');
+      }
+      return this.usersService.verifyEmail(email_verify_token);
+    } catch (error) {
+      throw new BadRequestException('Token is invalid');
+    }
+  }
+  async forgotPassword(email: string) {
+    const forgot_password_token = await this.signForgotPasswordToken({ email });
+    return this.usersService.forgotPassword(email, forgot_password_token);
+  }
+  async resetPassword(forgot_password_token: string, password: string) {
+    try {
+      const result = await this.jwtService.verify(forgot_password_token, {
+        secret: this.configService.get<string>('JWT_FORGOT_PASSWORD_SECRET')
+      })
+      const day = new Date();
+      if (convertExpiresInToDate(result.exp).getTime() < day.getTime()) {
+        throw new BadRequestException('Token is expired');
+      }
+      return this.usersService.resetPassword(forgot_password_token, password);
+    } catch (error) {
+      throw new BadRequestException('Token is invalid');
+    }
   }
 }
