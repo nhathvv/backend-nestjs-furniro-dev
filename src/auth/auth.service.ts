@@ -14,23 +14,26 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private mailService: MailService
   ) { }
+
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOneByUsername(username);
-    if (user) {
+    const checkEmail = await this.usersService.findOneByEmail(username);
+    if (user || checkEmail) {
       if (this.usersService.isValidPassword(pass, user.password)) {
         return user
       }
     }
     return null;
   }
+
   signRefreshToken(payload: any) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
       expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
     });
   }
+
   signEmailVerifyToken(payload: any) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_EMAIL_VERIFY_SECRET'),
@@ -39,13 +42,14 @@ export class AuthService {
   }
 
   async login(user: IUser, @Res({ passthrough: true }) response: Response) {
-    const { _id, username, email } = user;
+    const { _id, username, email, verified } = user;
     const payload = {
       sub: 'Token Login',
       iss: 'From server',
       _id,
       username,
-      email
+      email,
+      verified
     }
     const refresh_token = this.signRefreshToken(payload);
     await this.usersService.updateRefreshToken(_id, refresh_token);
@@ -65,15 +69,18 @@ export class AuthService {
       }
     };
   }
+
   async register(registerDto: registerUserDTO) {
     const email_verify_token = await this.signEmailVerifyToken({ email: registerDto.email });
     registerDto.email_verify_token = email_verify_token;
     return this.usersService.create(registerDto);
   }
+
   async logout(user: IUser, res: Response) {
     res.clearCookie('refresh_token');
     return this.usersService.updateRefreshToken(user._id, '');
   }
+
   async getNewAccessToken(refresh_token: string, res: Response) {
     try {
       await this.jwtService.verifyAsync(refresh_token, {
@@ -109,5 +116,9 @@ export class AuthService {
       throw new BadRequestException('Invalid refresh token. Flease login again!!');
     }
 
+  }
+
+  async verifyEmail(email_verify_token: string) {
+    return this.usersService.verifyEmail(email_verify_token);
   }
 }

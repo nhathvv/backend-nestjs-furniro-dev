@@ -32,10 +32,4 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
-
-  @Post('/verify-email')
-  @ResponeMessage('Verify email')
-  async handleVerifyEmail(@Body('email_verify_token') email_verify_token: string) {
-    return this.usersService.verifyEmail(email_verify_token);
-  }
 }

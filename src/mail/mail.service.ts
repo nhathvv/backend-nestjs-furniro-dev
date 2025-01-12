@@ -11,8 +11,8 @@ export class MailService {
     console.log(url);
     return await this.mailerService.sendMail({
       to: user.email, // list of receivers
-      from: '"Support Team" <support@example.com>', // override default from
-      subject: 'Welcome to Furniro Dev! Confirm your Email',
+      from: '"Furniro.dev" <support@example.com>', // override default from
+      subject: 'Welcome to Furniro Dev! Verify your Email',
       template: './verify-account', // `.hbs` extension is appended automatically
       context: { // ✏️ filling curly brackets with content
         name: user.username,

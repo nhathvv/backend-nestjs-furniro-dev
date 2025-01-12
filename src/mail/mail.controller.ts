@@ -8,7 +8,6 @@ import { IUser } from 'src/users/users.interface';
 export class MailController {
   constructor(
     private readonly mailService: MailService,
-    private readonly mailerService: MailerService,
   ) { }
 
   @Get()

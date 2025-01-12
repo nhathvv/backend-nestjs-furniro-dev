@@ -37,6 +37,16 @@ export class UsersService {
       createdAt: result.createdAt,
     }
   }
+
+  findOneByUsername(username: string) {
+    return this.userModel.findOne({ username })
+  }
+  findOneByEmail(email: string) {
+    return this.userModel.findOne({ email })
+  }
+  async findOneByRefreshToken(refresh_token: string) {
+    return this.userModel.findOne({ refresh_token });
+  }
   async verifyEmail(email_verify_token: string) {
     const user = await this.userModel.findOne({ email_verify_token });
     if (!user) {
@@ -44,18 +54,12 @@ export class UsersService {
     }
     return await this.userModel.updateOne({ email_verify_token }, { email_verify_token: '', verified: UserVerifyStatus.Verified });
   }
-  findOneByUsername(username: string) {
-    return this.userModel.findOne({ username })
-  }
   isValidPassword(password: string, hash: string) {
     return hashSync(password, hash)
   }
   hashPassword(password: string) {
     const salt = genSaltSync(10);
     return hashSync(password, salt);
-  }
-  async findOneByRefreshToken(refresh_token: string) {
-    return this.userModel.findOne({ refresh_token });
   }
   findAll() {
     return `This action returns all users`;

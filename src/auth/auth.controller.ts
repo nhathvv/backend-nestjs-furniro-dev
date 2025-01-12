@@ -9,11 +9,15 @@ import { registerUserDTO } from 'src/users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService
+  ) { }
+
   @Public()
   @UseGuards(LocalAuthGuard)
   @ResponeMessage('Login success')
   @Post('/login')
+
   async login(@User() user, @Res({ passthrough: true }) res: Response) {
     return this.authService.login(user, res);
   }
@@ -49,4 +53,9 @@ export class AuthController {
     return this.authService.getNewAccessToken(refresh_token, res);
   }
 
+  @Post('/verify-email')
+  @ResponeMessage('Verify email')
+  async handleVerifyEmail(@Body('email_verify_token') email_verify_token: string) {
+    return this.authService.verifyEmail(email_verify_token);
+  }
 }
