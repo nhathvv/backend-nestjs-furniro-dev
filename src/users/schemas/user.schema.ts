@@ -52,6 +52,9 @@ export class User {
   username: string;
 
   @Prop({ default: "" })
+  avatar: string;
+
+  @Prop({ default: "" })
   forgot_password_token: string;
 
   @Prop({ type: 'number', enum: UserVerifyStatus, default: 0 })

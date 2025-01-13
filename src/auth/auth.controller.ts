@@ -8,7 +8,7 @@ import { Response } from 'express';
 import { registerUserDTO } from 'src/users/dto/create-user.dto';
 import { ApiBearerAuth, ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
