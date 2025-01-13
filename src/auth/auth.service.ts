@@ -55,14 +55,16 @@ export class AuthService {
   }
 
   async login(user: IUser, @Res({ passthrough: true }) response: Response) {
-    const { _id, username, email, verified } = user;
+    const { _id, username, email, verified, avatar, role } = user;
     const payload = {
       sub: 'Token Login',
       iss: 'From server',
       _id,
       username,
       email,
-      verified
+      verified,
+      avatar,
+      role
     }
     const refresh_token = this.signRefreshToken(payload);
     await this.usersService.updateRefreshToken(_id, refresh_token);
@@ -79,6 +81,8 @@ export class AuthService {
         _id,
         email,
         username,
+        avatar,
+        role,
       },
     };
   }
@@ -103,13 +107,15 @@ export class AuthService {
       if (!user) {
         throw new BadRequestException('User not found');
       }
-      const { _id, username, email } = user;
+      const { _id, username, email, avatar, role } = user;
       const payload = {
         sub: 'Token Login',
         iss: 'From server',
         _id,
         username,
-        email
+        email,
+        avatar,
+        role
       }
       const new_refresh_token = this.signRefreshToken(payload);
       await this.usersService.updateRefreshToken(_id.toString(), new_refresh_token);
@@ -123,6 +129,8 @@ export class AuthService {
           _id,
           email,
           username,
+          avatar,
+          role
         },
       };
     } catch (error) {
