@@ -30,6 +30,7 @@
     "@nestjs/passport": "10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^8.1.1",
+    "@types/cookie-parser": "^1.4.8",
     "@types/ms": "^0.7.34",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",

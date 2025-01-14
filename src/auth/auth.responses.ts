@@ -10,6 +10,7 @@ export interface AuthResponses {
       avatar: string;
       role: string;
     }
+    refresh_token: string;
   },
   RegisterResponse: {
     _id: Types.ObjectId;
@@ -24,6 +25,7 @@ export interface AuthResponses {
   },
   GetNewAccessTokenResonse: {
     access_token: string;
+    refresh_token: string;
     user: {
       _id: Types.ObjectId;
       email: string;

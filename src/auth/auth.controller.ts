@@ -6,9 +6,8 @@ import { IUser } from 'src/users/users.interface';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Response } from 'express';
 import { registerUserDTO } from 'src/users/dto/create-user.dto';
-import { ApiBearerAuth, ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthResponses } from './auth.responses';
-import mongoose from 'mongoose';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -72,8 +71,8 @@ export class AuthController {
   @Post('/refresh-token')
   @Public()
   @ResponeMessage('Get user by refresh token')
-  async getNewAccessToken(@Request() req, @Res({ passthrough: true }) res: Response) {
-    const refresh_token = req.cookies['refresh_token'];
+  async getNewAccessToken(@Body('refresh_token') refresh_token: string, @Res({ passthrough: true }) res: Response) {
+    // const refresh_token = req.cookies['refresh_token'];
     return this.authService.getNewAccessToken(refresh_token, res);
   }
 

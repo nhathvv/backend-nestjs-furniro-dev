@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
+import { request, Response } from 'express';
 import ms from 'ms';
 import { registerUserDTO } from 'src/users/dto/create-user.dto';
 import { UserVerifyStatus } from 'src/users/schemas/user.schema';
@@ -69,15 +69,16 @@ export class AuthService {
     }
     const refresh_token = this.signRefreshToken(payload);
     await this.usersService.updateRefreshToken(new mongoose.Types.ObjectId(_id).toString(), refresh_token);
-    response.cookie('refresh_token', refresh_token, {
-      httpOnly: true,
-      maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN')),
-    });
+    // response.cookie('refresh_token', refresh_token, {
+    //   httpOnly: true,
+    //   maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN')),
+    // });
     if (user.verified !== UserVerifyStatus.Verified) {
       throw new BadRequestException('Please verify your email first');
     }
     return {
       access_token: this.jwtService.sign(payload),
+      refresh_token,
       user: {
         _id: new mongoose.Types.ObjectId(_id),
         email,
@@ -126,6 +127,7 @@ export class AuthService {
       });
       return {
         access_token: this.jwtService.sign(payload),
+        refresh_token: new_refresh_token,
         user: {
           _id,
           email,
