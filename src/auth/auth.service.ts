@@ -18,7 +18,7 @@ export class AuthService {
     private configService: ConfigService,
   ) { }
 
-  async validateUser(username: string, pass: string): Promise<any> {
+  async validateUser(username: string, pass: string): Promise<IUser | null> {
     const user = await this.usersService.findOneByUsername(username)
     const userByEmail = await this.usersService.findOneByEmail(username)
     if (user) {
@@ -34,21 +34,21 @@ export class AuthService {
     return null;
   }
 
-  signRefreshToken(payload: any) {
+  signRefreshToken(payload: IUser) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
       expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
     });
   }
 
-  signEmailVerifyToken(payload: any) {
+  signEmailVerifyToken(payload: { email: string }) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_EMAIL_VERIFY_SECRET'),
       expiresIn: this.configService.get<string>('JWT_EMAIL_VERIFY_EXPIRESIN'),
     });
   }
 
-  signForgotPasswordToken(payload: any) {
+  signForgotPasswordToken(payload: { email: string }) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_FORGOT_PASSWORD_SECRET'),
       expiresIn: this.configService.get<string>('JWT_FORGOT_PASSWORD_EXPIRESIN'),

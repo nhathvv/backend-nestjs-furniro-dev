@@ -68,7 +68,6 @@ export class UsersService {
   }
 
   isValidPassword(password: string, hash: string) {
-    console.log(password, hash);
     return hashSync(password, hash) || false;
   }
 

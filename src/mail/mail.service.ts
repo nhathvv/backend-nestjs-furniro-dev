@@ -1,5 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
+import { IUser } from 'src/users/users.interface';
 
 @Injectable()
 export class MailService {
@@ -7,7 +8,7 @@ export class MailService {
     private readonly mailerService: MailerService,
   ) { }
 
-  async sendEmailVerify(user: any, email_verify_token: string) {
+  async sendEmailVerify(user: IUser, email_verify_token: string) {
     const url = `http://localhost:3000/auth/confirm?email_veriy_token=${email_verify_token}`;
     return await this.mailerService.sendMail({
       to: user.email, // list of receivers
@@ -21,7 +22,7 @@ export class MailService {
     });
   }
 
-  async sendEmailForgotPassword(user: any, forgot_password_token: string) {
+  async sendEmailForgotPassword(user: IUser, forgot_password_token: string) {
     const url = `http://localhost:3000/auth/confirm?forgot_password_token=${forgot_password_token}`;
     return await this.mailerService.sendMail({
       to: user.email, // list of receivers
