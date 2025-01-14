@@ -12,7 +12,7 @@ import { RESPONSE_MESSAGE } from '../decorator/customize';
 export interface Response<T> {
   statusCode: number;
   message: string;
-  data: any;
+  data: T;
 }
 
 @Injectable()

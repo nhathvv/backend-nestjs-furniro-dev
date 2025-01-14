@@ -3,12 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import ms from 'ms';
-import { MailService } from 'src/mail/mail.service';
 import { registerUserDTO } from 'src/users/dto/create-user.dto';
 import { UserVerifyStatus } from 'src/users/schemas/user.schema';
 import { IUser } from 'src/users/users.interface';
 import { UsersService } from 'src/users/users.service';
 import { convertExpiresInToDate } from 'src/utils/common';
+import { AuthResponses } from './auth.responses';
+import mongoose from 'mongoose';
 @Injectable()
 export class AuthService {
   constructor(
@@ -54,7 +55,7 @@ export class AuthService {
     });
   }
 
-  async login(user: IUser, @Res({ passthrough: true }) response: Response) {
+  async login(user: IUser, @Res({ passthrough: true }) response: Response): Promise<AuthResponses['LoginResponse']> {
     const { _id, username, email, verified, avatar, role } = user;
     const payload = {
       sub: 'Token Login',
@@ -67,7 +68,7 @@ export class AuthService {
       role
     }
     const refresh_token = this.signRefreshToken(payload);
-    await this.usersService.updateRefreshToken(_id, refresh_token);
+    await this.usersService.updateRefreshToken(new mongoose.Types.ObjectId(_id).toString(), refresh_token);
     response.cookie('refresh_token', refresh_token, {
       httpOnly: true,
       maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN')),
@@ -78,7 +79,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       user: {
-        _id,
+        _id: new mongoose.Types.ObjectId(_id),
         email,
         username,
         avatar,
@@ -95,10 +96,10 @@ export class AuthService {
 
   async logout(user: IUser, res: Response) {
     res.clearCookie('refresh_token');
-    return this.usersService.updateRefreshToken(user._id, '');
+    return this.usersService.updateRefreshToken(new mongoose.Types.ObjectId(user._id).toString(), '');
   }
 
-  async getNewAccessToken(refresh_token: string, res: Response) {
+  async getNewAccessToken(refresh_token: string, res: Response): Promise<AuthResponses['GetNewAccessTokenResonse']> {
     try {
       await this.jwtService.verifyAsync(refresh_token, {
         secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET')

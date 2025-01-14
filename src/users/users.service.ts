@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { genSaltSync, hashSync } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
+import { AuthResponses } from 'src/auth/auth.responses';
 @Injectable()
 export class UsersService {
   @InjectModel(User.name)
@@ -17,7 +18,7 @@ export class UsersService {
     private mailService: MailService,
 
   ) { }
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<AuthResponses['RegisterResponse']> {
     const isEmailExist = await this.userModel.findOne({ email: createUserDto.email });
     if (isEmailExist) {
       throw new BadRequestException('Email already exist');

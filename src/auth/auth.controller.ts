@@ -7,6 +7,8 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { Response } from 'express';
 import { registerUserDTO } from 'src/users/dto/create-user.dto';
 import { ApiBearerAuth, ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { AuthResponses } from './auth.responses';
+import mongoose from 'mongoose';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -42,9 +44,13 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @Get('/account')
   @ResponeMessage('Get user information')
-  async getAccount(@User() user: IUser) {
+  async getAccount(@User() user: IUser): Promise<AuthResponses['GetAccountResponse']> {
     return {
-      user
+      user: {
+        _id: user._id,
+        email: user.email,
+        username: user.username,
+      }
     }
   }
 
