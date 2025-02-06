@@ -6,9 +6,7 @@ import { IUser } from 'src/users/users.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private configService: ConfigService,
-  ) {
+  constructor(private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -20,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       _id,
       username,
-      email
+      email,
     };
   }
 }

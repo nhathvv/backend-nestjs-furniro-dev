@@ -32,6 +32,7 @@
     "@nestjs/swagger": "^8.1.1",
     "@types/cookie-parser": "^1.4.8",
     "@types/ms": "^0.7.34",
+    "api-query-params": "^5.4.0",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

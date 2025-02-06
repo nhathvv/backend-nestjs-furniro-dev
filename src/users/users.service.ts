@@ -13,38 +13,43 @@ import { AuthResponses } from 'src/auth/auth.responses';
 export class UsersService {
   @InjectModel(User.name)
   private userModel: SoftDeleteModel<UserDocument>;
-  constructor(
-    private configService: ConfigService,
-    private mailService: MailService,
-
-  ) { }
-  async create(createUserDto: CreateUserDto): Promise<AuthResponses['RegisterResponse']> {
-    const isEmailExist = await this.userModel.findOne({ email: createUserDto.email });
+  constructor(private mailService: MailService) {}
+  async create(
+    createUserDto: CreateUserDto,
+  ): Promise<AuthResponses['RegisterResponse']> {
+    const isEmailExist = await this.userModel.findOne({
+      email: createUserDto.email,
+    });
     if (isEmailExist) {
       throw new BadRequestException('Email already exist');
     }
-    const isUsernameExist = await this.userModel.findOne({ username: createUserDto.username });
+    const isUsernameExist = await this.userModel.findOne({
+      username: createUserDto.username,
+    });
     if (isUsernameExist) {
       throw new BadRequestException('Username already exist');
     }
-    await this.mailService.sendEmailVerify(createUserDto, createUserDto.email_verify_token);
+    await this.mailService.sendEmailVerify(
+      createUserDto,
+      createUserDto.email_verify_token,
+    );
     const result = await this.userModel.create({
       ...createUserDto,
-      password: this.hashPassword(createUserDto.password)
-    })
+      password: this.hashPassword(createUserDto.password),
+    });
 
     return {
       _id: result._id,
       createdAt: result.createdAt,
-    }
+    };
   }
 
   findOneByUsername(username: string) {
-    return this.userModel.findOne({ username })
+    return this.userModel.findOne({ username });
   }
 
   findOneByEmail(email: string) {
-    return this.userModel.findOne({ email })
+    return this.userModel.findOne({ email });
   }
 
   async findOneByRefreshToken(refresh_token: string) {
@@ -56,15 +61,20 @@ export class UsersService {
     if (!user) {
       throw new BadRequestException('Email verify token is invalid');
     }
-    return await this.userModel.updateOne({ email_verify_token }, { email_verify_token: '', verified: UserVerifyStatus.Verified });
+    return await this.userModel.updateOne(
+      { email_verify_token },
+      { email_verify_token: '', verified: UserVerifyStatus.Verified },
+    );
   }
   async resetPassword(forgot_password_token: string, password: string) {
     const user = await this.userModel.findOne({ forgot_password_token });
     if (!user) {
       throw new BadRequestException('Forgot password token is invalid');
     }
-    return await this.userModel.updateOne({ forgot_password_token }, { forgot_password_token: '', password: this.hashPassword(password) });
-
+    return await this.userModel.updateOne(
+      { forgot_password_token },
+      { forgot_password_token: '', password: this.hashPassword(password) },
+    );
   }
 
   isValidPassword(password: string, hash: string) {
@@ -77,7 +87,10 @@ export class UsersService {
       throw new BadRequestException('Email not found');
     }
     await this.userModel.updateOne({ email }, { forgot_password_token });
-    return this.mailService.sendEmailForgotPassword(user, forgot_password_token);
+    return this.mailService.sendEmailForgotPassword(
+      user,
+      forgot_password_token,
+    );
   }
 
   hashPassword(password: string) {

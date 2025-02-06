@@ -97,7 +97,8 @@ export class AuthService {
 
   async logout(user: IUser, res: Response) {
     res.clearCookie('refresh_token');
-    return this.usersService.updateRefreshToken(new mongoose.Types.ObjectId(user._id).toString(), '');
+    const result = this.usersService.updateRefreshToken(new mongoose.Types.ObjectId(user._id).toString(), '');
+    return {}
   }
 
   async getNewAccessToken(refresh_token: string, res: Response): Promise<AuthResponses['GetNewAccessTokenResonse']> {

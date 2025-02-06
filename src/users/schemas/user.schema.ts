@@ -1,10 +1,10 @@
-import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
 
 export enum UserVerifyStatus {
   Unverified, // chưa xác thực email, mặc định = 0
   Verified, // đã xác thực email
-  Banned // bị khóa
+  Banned, // bị khóa
 }
 export type UserDocument = HydratedDocument<User>;
 @Schema({ timestamps: true })
@@ -15,25 +15,25 @@ export class User {
   @Prop()
   last_name: string;
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   company_name: string; //optional
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   region: string; //optional
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   street_address: string; //optional
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   city: string; //optional
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   province: string; //optional
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   zip_code: string; //optional
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   phone: string; //optional
 
   @Prop()
@@ -42,38 +42,37 @@ export class User {
   @Prop()
   password: string;
 
-  @Prop({ default: "CUSTOMER" })
+  @Prop({ default: 'CUSTOMER' })
   role: string;
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   email_verify_token: string;
 
   @Prop()
   username: string;
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   avatar: string;
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   forgot_password_token: string;
 
   @Prop({ type: 'number', enum: UserVerifyStatus, default: 0 })
   verified: UserVerifyStatus;
 
-  @Prop({ default: "" })
+  @Prop({ default: '' })
   refresh_token: string;
 
   @Prop()
   deletedAt: Date;
 
   @Prop()
-  createdAt?: Date
+  createdAt?: Date;
 
   @Prop()
-  updatedAt?: Date
+  updatedAt?: Date;
 
   @Prop()
   deleted: boolean;
-
 }
 export const UserSchema = SchemaFactory.createForClass(User);
