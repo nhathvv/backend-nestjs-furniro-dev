@@ -19,7 +19,7 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsEmail()
-  @ApiProperty({ example: "nhathv.21it@gmail.com" })
+  @ApiProperty({ example: 'nhathv.21it@gmail.com' })
   email: string;
 
   @IsNotEmpty()
@@ -45,7 +45,7 @@ export class registerUserDTO {
 
   @IsNotEmpty()
   @IsEmail()
-  @ApiProperty({ example: "nhathv.21it@gmail.com" })
+  @ApiProperty({ example: 'nhathv.21it@gmail.com' })
   email: string;
 
   @IsNotEmpty()

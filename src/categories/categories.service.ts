@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { IUser } from 'src/users/users.interface';
@@ -93,7 +93,7 @@ export class CategoriesService {
 
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error('Id is invalid');
+      throw new BadRequestException('ID is invalid');
     }
     await this.categoryModel.updateOne(
       {

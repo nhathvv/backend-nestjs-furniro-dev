@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ProductsModule } from './products/products.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -26,8 +27,10 @@ import { CategoriesModule } from './categories/categories.module';
     UsersModule,
     AuthModule,
     MailModule,
-    CategoriesModule,],
+    CategoriesModule,
+    ProductsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

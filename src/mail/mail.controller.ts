@@ -6,9 +6,7 @@ import { IUser } from 'src/users/users.interface';
 
 @Controller('mail')
 export class MailController {
-  constructor(
-    private readonly mailService: MailService,
-  ) { }
+  constructor(private readonly mailService: MailService) {}
 
   @Get()
   @Public()

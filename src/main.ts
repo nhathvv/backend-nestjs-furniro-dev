@@ -20,10 +20,12 @@ async function bootstrap() {
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: "1",
-  }).setGlobalPrefix('api');
+  app
+    .enableVersioning({
+      type: VersioningType.URI,
+      defaultVersion: '1',
+    })
+    .setGlobalPrefix('api');
 
   // Swagger
   const config = new DocumentBuilder()

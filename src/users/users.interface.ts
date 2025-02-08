@@ -1,5 +1,4 @@
-import { Types } from "mongoose";
-
+import { Types } from 'mongoose';
 
 export interface IUser {
   _id?: Types.ObjectId;
@@ -7,5 +6,5 @@ export interface IUser {
   email: string;
   verified?: number;
   avatar?: string;
-  role?: string
+  role?: string;
 }

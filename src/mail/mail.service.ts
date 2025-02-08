@@ -4,9 +4,7 @@ import { IUser } from 'src/users/users.interface';
 
 @Injectable()
 export class MailService {
-  constructor(
-    private readonly mailerService: MailerService,
-  ) { }
+  constructor(private readonly mailerService: MailerService) {}
 
   async sendEmailVerify(user: IUser, email_verify_token: string) {
     const url = `http://localhost:3000/auth/confirm?email_veriy_token=${email_verify_token}`;
@@ -15,9 +13,10 @@ export class MailService {
       from: '"Furniro.dev" <support@example.com>', // override default from
       subject: 'Welcome to Furniro Dev! Verify your Email',
       template: './verify-account', // `.hbs` extension is appended automatically
-      context: { // ✏️ filling curly brackets with content
+      context: {
+        // ✏️ filling curly brackets with content
         name: user.username,
-        url
+        url,
       },
     });
   }
@@ -29,11 +28,11 @@ export class MailService {
       from: '"Furniro.dev" <support@example.com>', // override default from
       subject: 'Reset Your Password - Furniro Dev',
       template: './forgot-password', // `.hbs` extension is appended automatically
-      context: { // ✏️ filling curly brackets with content
+      context: {
+        // ✏️ filling curly brackets with content
         name: user.username,
-        url
+        url,
       },
     });
   }
-
 }

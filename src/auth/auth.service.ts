@@ -16,11 +16,11 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async validateUser(username: string, pass: string): Promise<IUser | null> {
-    const user = await this.usersService.findOneByUsername(username)
-    const userByEmail = await this.usersService.findOneByEmail(username)
+    const user = await this.usersService.findOneByUsername(username);
+    const userByEmail = await this.usersService.findOneByEmail(username);
     if (user) {
       if (this.usersService.isValidPassword(pass, user.password)) {
         return user;
@@ -51,11 +51,16 @@ export class AuthService {
   signForgotPasswordToken(payload: { email: string }) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_FORGOT_PASSWORD_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_FORGOT_PASSWORD_EXPIRESIN'),
+      expiresIn: this.configService.get<string>(
+        'JWT_FORGOT_PASSWORD_EXPIRESIN',
+      ),
     });
   }
 
-  async login(user: IUser, @Res({ passthrough: true }) response: Response): Promise<AuthResponses['LoginResponse']> {
+  async login(
+    user: IUser,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<AuthResponses['LoginResponse']> {
     const { _id, username, email, verified, avatar, role } = user;
     const payload = {
       sub: 'Token Login',
@@ -65,10 +70,13 @@ export class AuthService {
       email,
       verified,
       avatar,
-      role
-    }
+      role,
+    };
     const refresh_token = this.signRefreshToken(payload);
-    await this.usersService.updateRefreshToken(new mongoose.Types.ObjectId(_id).toString(), refresh_token);
+    await this.usersService.updateRefreshToken(
+      new mongoose.Types.ObjectId(_id).toString(),
+      refresh_token,
+    );
     // response.cookie('refresh_token', refresh_token, {
     //   httpOnly: true,
     //   maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN')),
@@ -90,22 +98,30 @@ export class AuthService {
   }
 
   async register(registerDto: registerUserDTO) {
-    const email_verify_token = await this.signEmailVerifyToken({ email: registerDto.email });
+    const email_verify_token = await this.signEmailVerifyToken({
+      email: registerDto.email,
+    });
     registerDto.email_verify_token = email_verify_token;
     return this.usersService.create(registerDto);
   }
 
   async logout(user: IUser, res: Response) {
     res.clearCookie('refresh_token');
-    const result = this.usersService.updateRefreshToken(new mongoose.Types.ObjectId(user._id).toString(), '');
-    return {}
+    const result = this.usersService.updateRefreshToken(
+      new mongoose.Types.ObjectId(user._id).toString(),
+      '',
+    );
+    return {};
   }
 
-  async getNewAccessToken(refresh_token: string, res: Response): Promise<AuthResponses['GetNewAccessTokenResonse']> {
+  async getNewAccessToken(
+    refresh_token: string,
+    res: Response,
+  ): Promise<AuthResponses['GetNewAccessTokenResonse']> {
     try {
       await this.jwtService.verifyAsync(refresh_token, {
-        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET')
-      })
+        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+      });
       const user = await this.usersService.findOneByRefreshToken(refresh_token);
       if (!user) {
         throw new BadRequestException('User not found');
@@ -118,13 +134,18 @@ export class AuthService {
         username,
         email,
         avatar,
-        role
-      }
+        role,
+      };
       const new_refresh_token = this.signRefreshToken(payload);
-      await this.usersService.updateRefreshToken(_id.toString(), new_refresh_token);
+      await this.usersService.updateRefreshToken(
+        _id.toString(),
+        new_refresh_token,
+      );
       res.cookie('refresh_token', new_refresh_token, {
         httpOnly: true,
-        maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN')),
+        maxAge: ms(
+          this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
+        ),
       });
       return {
         access_token: this.jwtService.sign(payload),
@@ -134,19 +155,20 @@ export class AuthService {
           email,
           username,
           avatar,
-          role
+          role,
         },
       };
     } catch (error) {
-      throw new BadRequestException('Invalid refresh token. Flease login again!!');
+      throw new BadRequestException(
+        'Invalid refresh token. Flease login again!!',
+      );
     }
-
   }
 
   async verifyEmail(email_verify_token: string) {
     try {
       const result = await this.jwtService.verify(email_verify_token, {
-        secret: this.configService.get<string>('JWT_EMAIL_VERIFY_SECRET')
+        secret: this.configService.get<string>('JWT_EMAIL_VERIFY_SECRET'),
       });
       const day = new Date();
       if (convertExpiresInToDate(result.exp).getTime() < day.getTime()) {
@@ -164,8 +186,8 @@ export class AuthService {
   async resetPassword(forgot_password_token: string, password: string) {
     try {
       const result = await this.jwtService.verify(forgot_password_token, {
-        secret: this.configService.get<string>('JWT_FORGOT_PASSWORD_SECRET')
-      })
+        secret: this.configService.get<string>('JWT_FORGOT_PASSWORD_SECRET'),
+      });
       const day = new Date();
       if (convertExpiresInToDate(result.exp).getTime() < day.getTime()) {
         throw new BadRequestException('Token is expired');

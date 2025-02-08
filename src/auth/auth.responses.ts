@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types } from 'mongoose';
 
 export interface AuthResponses {
   LoginResponse: {
@@ -9,20 +9,20 @@ export interface AuthResponses {
       username: string;
       avatar: string;
       role: string;
-    }
+    };
     refresh_token: string;
-  },
+  };
   RegisterResponse: {
     _id: Types.ObjectId;
     createdAt: Date;
-  },
+  };
   GetAccountResponse: {
     user: {
       _id: Types.ObjectId;
       email: string;
       username: string;
-    }
-  },
+    };
+  };
   GetNewAccessTokenResonse: {
     access_token: string;
     refresh_token: string;
@@ -32,7 +32,6 @@ export interface AuthResponses {
       username: string;
       avatar: string;
       role: string;
-    }
-  }
-
+    };
+  };
 }
