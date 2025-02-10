@@ -16,6 +16,7 @@ import { Public, ResponeMessage, User } from 'src/decorator/customize';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { IUser } from 'src/users/users.interface';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ProductResponse } from 'src/products/products.response';
 
 @ApiTags('Products')
 @Controller('products')
@@ -77,7 +78,10 @@ export class ProductsController {
     },
   })
   @ApiBearerAuth('access-token')
-  create(@Body() createProductDto: CreateProductDto, @User() user: IUser) {
+  create(
+    @Body() createProductDto: CreateProductDto,
+    @User() user: IUser,
+  ): Promise<ProductResponse['CreateProductResponse']> {
     return this.productsService.create(createProductDto, user);
   }
 
