@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -14,19 +15,23 @@ import { ProductSize, ProductStatus } from 'src/utils/enum';
 export class CreateProductDto {
   @IsNotEmpty()
   @IsString()
+  @ApiProperty({ example: 'Product 1' })
   product_name: string;
 
   @IsNotEmpty()
   @IsString()
+  @ApiProperty({ example: 'Description of product 1' })
   product_description: string;
 
   @IsMongoId()
   categories: string;
 
   @IsEnum(ProductSize)
+  @ApiProperty({ example: 0 })
   size: string;
 
   @IsString()
+  @ApiProperty({ example: 'FFF2F2' })
   color: string;
 
   @IsNumber()

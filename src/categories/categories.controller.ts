@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  Res,
   Query,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
@@ -41,6 +40,7 @@ export class CategoriesController {
       },
     },
   })
+  @ApiBearerAuth('access-token')
   create(@Body() createCategoryDto: CreateCategoryDto, @User() user: IUser) {
     return this.categoriesService.create(createCategoryDto, user);
   }
