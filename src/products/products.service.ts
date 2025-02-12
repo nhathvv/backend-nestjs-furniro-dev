@@ -16,6 +16,8 @@ export class ProductsService {
   async create(createProductDto: CreateProductDto, user: IUser) {
     const product = await this.productModel.create({
       ...createProductDto,
+      size: Number(createProductDto.size),
+      status: Number(createProductDto.status),
       createdBy: {
         _id: new mongoose.Types.ObjectId(user._id),
         email: user.email,

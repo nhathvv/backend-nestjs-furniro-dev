@@ -26,7 +26,6 @@ export class CreateProductDto {
   @IsMongoId()
   categories: string;
 
-  @IsEnum(ProductSize)
   @ApiProperty({ example: 0 })
   size: string;
 
@@ -46,6 +45,5 @@ export class CreateProductDto {
   @Type(() => Number)
   discount?: number;
 
-  @IsEnum(ProductStatus)
   status: string;
 }
