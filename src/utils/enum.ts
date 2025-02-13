@@ -1,11 +1,11 @@
 export enum ProductSize {
-  S,
-  M,
-  L,
-  XL,
+  S = 'S',
+  M = 'M',
+  L = 'L',
+  XL = 'XL',
 }
 export enum ProductStatus {
-  DRAFT,
-  PUBLISHED,
-  OUT_OF_STOCK,
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  OUT_OF_STOCK = 'OUT_OF_STOCK',
 }

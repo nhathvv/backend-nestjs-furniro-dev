@@ -27,6 +27,7 @@ export class CreateProductDto {
   categories: string;
 
   @ApiProperty({ example: 0 })
+  @IsEnum(ProductSize)
   size: string;
 
   @IsString()
@@ -45,5 +46,7 @@ export class CreateProductDto {
   @Type(() => Number)
   discount?: number;
 
+  @IsEnum(ProductStatus)
+  @ApiProperty({ example: 'DRAFT' })
   status: string;
 }
