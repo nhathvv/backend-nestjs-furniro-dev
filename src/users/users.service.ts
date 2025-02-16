@@ -10,6 +10,10 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
 import { AuthResponses } from 'src/auth/auth.responses';
 import { BanDuration, UserVerifyStatus } from 'src/constants/enum';
+import { isEmpty } from 'class-validator';
+import aqp from 'api-query-params';
+import { IUser } from 'src/users/users.interface';
+import mongoose from 'mongoose';
 @Injectable()
 export class UsersService {
   @InjectModel(User.name)
@@ -98,20 +102,81 @@ export class UsersService {
     const salt = genSaltSync(10);
     return hashSync(password, salt);
   }
-  findAll() {
-    return `This action returns all users`;
+  async findAll(currentPage: number, limit: number, qsUrl: string) {
+    const { filter } = aqp(qsUrl);
+    let { sort }: { sort: any } = aqp(qsUrl);
+
+    delete filter.current;
+    delete filter.pageSize;
+
+    const offset = (currentPage - 1) * limit;
+    const defaultLimit = limit ? limit : 10;
+
+    const totalItems = (await this.userModel.find(filter)).length;
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    if (isEmpty(sort)) {
+      sort = '-updatedAt';
+    }
+    const result = await this.userModel
+      .find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      .sort(sort)
+      .select(
+        '-password -refresh_token -email_verify_token -forgot_password_token',
+      )
+      .exec();
+    return {
+      meta: {
+        current: currentPage,
+        pageSize: limit,
+        pages: totalPages,
+        total: totalItems,
+      },
+      result,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(id: string) {
+    return this.userModel
+      .findById(id)
+      .select(
+        '-password -refresh_token -email_verify_token -forgot_password_token',
+      );
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(id: string, updateUserDto: UpdateUserDto, user: IUser) {
+    return this.userModel.updateOne(
+      {
+        _id: id,
+      },
+      {
+        ...updateUserDto,
+        updatedBy: {
+          _id: new mongoose.Types.ObjectId(user._id),
+          email: user.email,
+        },
+      },
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string, user: IUser) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('ID is invalid');
+    }
+    await this.userModel.updateOne(
+      {
+        _id: id,
+      },
+      {
+        deletedBy: {
+          _id: new mongoose.Types.ObjectId(user._id),
+          email: user.email,
+        },
+      },
+    );
+    return this.userModel.softDelete({ _id: id });
   }
   updateRefreshToken(_id: string, refresh_token: string) {
     return this.userModel.updateOne({ _id }, { refresh_token });

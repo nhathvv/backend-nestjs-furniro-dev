@@ -9,6 +9,7 @@ import {
   Res,
   Put,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,7 +17,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { BanDuration } from 'src/constants/enum';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { ResponeMessage } from 'src/decorator/customize';
+import { ResponeMessage, User } from 'src/decorator/customize';
+import { IUser } from 'src/users/users.interface';
 
 @ApiTags('Users')
 @Controller('users')
@@ -24,28 +26,45 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @ResponeMessage('User created successfully')
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @ResponeMessage('Get all users success')
+  findAll(
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qsUrl: string,
+  ) {
+    return this.usersService.findAll(+currentPage, +limit, qsUrl);
   }
 
   @Get(':id')
+  @ResponeMessage('Get user by id success')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @ResponeMessage('User updated successfully')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @User() user: IUser,
+  ) {
+    return this.usersService.update(id, updateUserDto, user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @ResponeMessage('User deleted successfully')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  remove(@Param('id') id: string, @User() user: IUser) {
+    return this.usersService.remove(id, user);
   }
 
   @Put('banned/:id')
