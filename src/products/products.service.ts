@@ -65,7 +65,7 @@ export class ProductsService {
       .findOne({
         _id: id,
       })
-      .populate([{ path: 'categories', select: { name: 1, _id: 0 } }]);
+      .populate([{ path: 'categories', select: { name: 1, _id: 1 } }]);
   }
 
   update(id: string, updateProductDto: UpdateProductDto, user: IUser) {
