@@ -1,11 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { BanDuration, UserVerifyStatus } from 'src/constants/enum';
 
-export enum UserVerifyStatus {
-  Unverified, // chưa xác thực email, mặc định = 0
-  Verified, // đã xác thực email
-  Banned, // bị khóa
-}
 export type UserDocument = HydratedDocument<User>;
 @Schema({ timestamps: true })
 export class User {
@@ -74,5 +70,17 @@ export class User {
 
   @Prop()
   deleted: boolean;
+
+  @Prop({ default: null })
+  banReason: string;
+
+  @Prop({ default: null })
+  banStartDate: Date;
+
+  @Prop({ default: null })
+  banEndDate: Date; // Thêm trường thời gian hết hạn ban
+
+  @Prop({ enum: BanDuration, default: null })
+  banDuration: BanDuration;
 }
 export const UserSchema = SchemaFactory.createForClass(User);

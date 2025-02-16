@@ -2,13 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument, UserVerifyStatus } from './schemas/user.schema';
+import { User, UserDocument } from './schemas/user.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { ConfigService } from '@nestjs/config';
 import { genSaltSync, hashSync } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
 import { AuthResponses } from 'src/auth/auth.responses';
+import { BanDuration, UserVerifyStatus } from 'src/constants/enum';
 @Injectable()
 export class UsersService {
   @InjectModel(User.name)
@@ -114,5 +115,65 @@ export class UsersService {
   }
   updateRefreshToken(_id: string, refresh_token: string) {
     return this.userModel.updateOne({ _id }, { refresh_token });
+  }
+  async banUser(userId: string, reason: string, duration: BanDuration) {
+    const banStartDate = new Date();
+    const banEndDate = new Date(banStartDate.getTime() + BanDuration[duration]);
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          verified: UserVerifyStatus.Banned,
+          banReason: reason,
+          banStartDate,
+          banEndDate,
+          banDuration: BanDuration[duration],
+        },
+        { new: true },
+      )
+      .select(
+        '-password -refresh_token -email_verify_token -forgot_password_token',
+      );
+  }
+
+  async getRemainingBanTime(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user?.banEndDate) return 0;
+
+    return Math.max(0, user.banEndDate.getTime() - Date.now());
+  }
+
+  async handleAutoUnban() {
+    const now = new Date();
+    await this.userModel.updateMany(
+      {
+        verified: UserVerifyStatus.Banned,
+        banEndDate: { $lte: now },
+      },
+      {
+        verified: UserVerifyStatus.Verified,
+        banReason: null,
+        banStartDate: null,
+        banEndDate: null,
+        banDuration: null,
+      },
+    );
+  }
+  async unbanUser(userId: string) {
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          verified: UserVerifyStatus.Verified,
+          banReason: null,
+          banStartDate: null,
+          banEndDate: null,
+          banDuration: null,
+        },
+        { new: true },
+      )
+      .select(
+        '-password -refresh_token -email_verify_token -forgot_password_token',
+      );
   }
 }

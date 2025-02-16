@@ -1,15 +1,23 @@
-import { BadRequestException, Injectable, Res } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Res,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { request, Response } from 'express';
 import ms from 'ms';
 import { registerUserDTO } from 'src/users/dto/create-user.dto';
-import { UserVerifyStatus } from 'src/users/schemas/user.schema';
 import { IUser } from 'src/users/users.interface';
 import { UsersService } from 'src/users/users.service';
-import { convertExpiresInToDate } from 'src/utils/common';
+import {
+  convertExpiresInToDate,
+  formatRemainingTime,
+} from 'src/constants/common';
 import { AuthResponses } from './auth.responses';
 import mongoose from 'mongoose';
+import { UserVerifyStatus } from 'src/constants/enum';
 @Injectable()
 export class AuthService {
   constructor(
@@ -19,21 +27,31 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, pass: string): Promise<IUser | null> {
-    const user = await this.usersService.findOneByUsername(username);
-    const userByEmail = await this.usersService.findOneByEmail(username);
-    if (user) {
-      if (this.usersService.isValidPassword(pass, user.password)) {
-        return user;
-      }
-    }
-    if (userByEmail) {
-      if (this.usersService.isValidPassword(pass, userByEmail.password)) {
-        return userByEmail;
-      }
-    }
-    return null;
-  }
+    const [user, userByEmail] = await Promise.all([
+      this.usersService.findOneByUsername(username),
+      this.usersService.findOneByEmail(username),
+    ]);
+    await this.checkBanned(user || userByEmail);
+    const validUser = [user, userByEmail].find(
+      (u) => u && this.usersService.isValidPassword(pass, u.password),
+    );
 
+    return validUser || null;
+  }
+  private async checkBanned(user: IUser | null) {
+    if (user?.verified === UserVerifyStatus.Banned) {
+      if (Date.now() > user.banEndDate.getTime()) {
+        await this.usersService.unbanUser(user._id.toString());
+      } else {
+        const remainingTime = user.banEndDate.getTime() - Date.now();
+        throw new UnauthorizedException(
+          `Tài khoản bị cấm đến ${user.banEndDate.toLocaleString()}. ` +
+            `Thời gian còn lại: ${formatRemainingTime(remainingTime)}. ` +
+            `Lý do: ${user.banReason}`,
+        );
+      }
+    }
+  }
   signRefreshToken(payload: IUser) {
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),

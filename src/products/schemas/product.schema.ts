@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { ProductSize, ProductStatus } from 'src/utils/enum';
+import { ProductSize, ProductStatus } from 'src/constants/enum';
 
 export type ProductDocument = HydratedDocument<Product>;
 @Schema({ timestamps: true })
@@ -36,7 +36,7 @@ export class Product {
   brand: string;
 
   @Prop()
-  color: string;
+  color?: string;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

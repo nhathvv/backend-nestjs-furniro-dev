@@ -10,7 +10,7 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { ProductSize, ProductStatus } from 'src/utils/enum';
+import { ProductSize, ProductStatus } from 'src/constants/enum';
 
 export class CreateProductDto {
   @IsNotEmpty()
@@ -32,7 +32,7 @@ export class CreateProductDto {
 
   @IsString()
   @ApiProperty({ example: 'FFF2F2' })
-  color: string;
+  color?: string;
 
   @IsNumber()
   @Type(() => Number)

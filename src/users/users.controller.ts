@@ -7,11 +7,16 @@ import {
   Param,
   Delete,
   Res,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { BanDuration } from 'src/constants/enum';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ResponeMessage } from 'src/decorator/customize';
 
 @ApiTags('Users')
 @Controller('users')
@@ -41,5 +46,23 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+
+  @Put('banned/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ResponeMessage('User banned successfully')
+  async banUser(
+    @Param('id') userId: string,
+    @Body() body: { reason: string; duration: BanDuration },
+  ) {
+    return this.usersService.banUser(userId, body.reason, body.duration);
+  }
+  @Put('unbanned/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ResponeMessage('User unbanned successfully')
+  async unbanUser(@Param('id') userId: string) {
+    return this.usersService.unbanUser(userId);
   }
 }

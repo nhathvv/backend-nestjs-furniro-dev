@@ -7,4 +7,6 @@ export interface IUser {
   verified?: number;
   avatar?: string;
   role?: string;
+  banEndDate?: Date;
+  banReason?: string;
 }
