@@ -14,7 +14,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { BanDuration } from 'src/constants/enum';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponeMessage, User } from 'src/decorator/customize';
@@ -27,6 +27,33 @@ export class UsersController {
 
   @Post()
   @ResponeMessage('User created successfully')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        first_name: {
+          type: 'string',
+          example: 'Nhat',
+        },
+        last_name: {
+          type: 'string',
+          example: 'Nguyen',
+        },
+        username: {
+          type: 'string',
+          example: 'nhatnguyen',
+        },
+        password: {
+          type: 'string',
+          example: '123456',
+        },
+        email: {
+          type: 'string',
+          example: 'nhatnguyen@gmail.com',
+        },
+      },
+    },
+  })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -70,6 +97,21 @@ export class UsersController {
   @Put('banned/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        reason: {
+          type: 'string',
+          example: 'Vi pham quy dinh',
+        },
+        duration: {
+          type: 'string',
+          example: 'FIVE_MINUTES',
+        },
+      },
+    },
+  })
   @ResponeMessage('User banned successfully')
   async banUser(
     @Param('id') userId: string,
