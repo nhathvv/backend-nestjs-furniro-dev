@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
+import { FileUploadModule } from './file-upload/file-upload.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -29,6 +30,7 @@ import { ProductsModule } from './products/products.module';
     MailModule,
     CategoriesModule,
     ProductsModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

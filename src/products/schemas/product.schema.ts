@@ -12,7 +12,7 @@ export class Product {
   product_description: string;
 
   @Prop()
-  size: ProductSize;
+  size?: ProductSize;
 
   @Prop()
   original_price: number;

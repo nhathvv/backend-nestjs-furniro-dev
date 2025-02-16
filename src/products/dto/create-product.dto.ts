@@ -28,7 +28,7 @@ export class CreateProductDto {
 
   @ApiProperty({ example: 0 })
   @IsEnum(ProductSize)
-  size: string;
+  size?: string;
 
   @IsString()
   @ApiProperty({ example: 'FFF2F2' })

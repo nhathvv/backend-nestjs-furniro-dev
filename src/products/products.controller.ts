@@ -95,6 +95,17 @@ export class ProductsController {
   ) {
     return this.productsService.findAll(+currentPage, +limit, qsUrl);
   }
+  @Get('search')
+  @Public()
+  @ResponeMessage('Search product by keyword')
+  async searchProducts(
+    @Query('keyword') keyword: string,
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+  ) {
+    console.log('keyword', keyword);
+    return this.productsService.search(keyword, +currentPage, +limit);
+  }
 
   @Get(':id')
   @Public()

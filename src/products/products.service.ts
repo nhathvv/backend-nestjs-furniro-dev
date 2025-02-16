@@ -100,4 +100,30 @@ export class ProductsService {
     );
     return this.productModel.softDelete({ _id: id });
   }
+  async search(keyword: string, currentPage: number, limit: number) {
+    const query = keyword
+      ? { product_name: { $regex: keyword, $options: 'i' } }
+      : {};
+    console.log('query', query);
+    const offset = (currentPage - 1) * limit;
+
+    const totalItems = await this.productModel.countDocuments(query);
+    const totalPages = Math.ceil(totalItems / limit);
+    const result = await this.productModel
+      .find(query)
+      .sort('-updatedAt')
+      .skip(offset)
+      .limit(limit)
+      .populate([{ path: 'categories', select: { name: 1, _id: 0 } }])
+      .exec();
+    return {
+      meta: {
+        current: currentPage,
+        pageSize: limit,
+        pages: totalPages,
+        total: totalItems,
+      },
+      result,
+    };
+  }
 }
