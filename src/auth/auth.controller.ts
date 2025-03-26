@@ -16,6 +16,7 @@ import { Response } from 'express';
 import { registerUserDTO } from 'src/users/dto/create-user.dto';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthResponses } from './auth.responses';
+import { RESPONSE_MESSAGE } from 'src/constants/message';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -24,7 +25,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(LocalAuthGuard)
-  @ResponeMessage('Login success')
+  @ResponeMessage(RESPONSE_MESSAGE.LOGIN_SUCCESS)
   @Post('/login')
   @ApiBody({
     schema: {
@@ -48,7 +49,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Get('/account')
-  @ResponeMessage('Get user information')
+  @ResponeMessage(RESPONSE_MESSAGE.GET_USER_INFORMATION)
   async getAccount(
     @User() user: IUser,
   ): Promise<AuthResponses['GetAccountResponse']> {
@@ -63,7 +64,7 @@ export class AuthController {
 
   @Public()
   @Post('/register')
-  @ResponeMessage('Register success')
+  @ResponeMessage(RESPONSE_MESSAGE.REGISTER_SUCCESS)
   async register(@Body() registerUserDTO: registerUserDTO) {
     return this.authService.register(registerUserDTO);
   }
@@ -71,7 +72,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('/logout')
   @ApiBearerAuth('access-token')
-  @ResponeMessage('Logout successfully!')
+  @ResponeMessage(RESPONSE_MESSAGE.LOGOUT_SUCCESSFULLY)
   async handleLogout(
     @User() user: IUser,
     @Res({ passthrough: true }) res: Response,
@@ -81,17 +82,16 @@ export class AuthController {
 
   @Post('/refresh-token')
   @Public()
-  @ResponeMessage('Get user by refresh token')
+  @ResponeMessage(RESPONSE_MESSAGE.GET_USER_BY_REFRESH_TOKEN)
   async getNewAccessToken(
     @Body('refresh_token') refresh_token: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    // const refresh_token = req.cookies['refresh_token'];
     return this.authService.getNewAccessToken(refresh_token, res);
   }
 
   @Post('/verify-email')
-  @ResponeMessage('Verify email')
+  @ResponeMessage(RESPONSE_MESSAGE.VERIFY_EMAIL)
   @ApiBody({
     schema: {
       type: 'object',
@@ -112,7 +112,7 @@ export class AuthController {
 
   @Post('/forgot-password')
   @Public()
-  @ResponeMessage('Forgot password')
+  @ResponeMessage(RESPONSE_MESSAGE.FORGOT_PASSWORD)
   @ApiBody({
     schema: {
       type: 'object',
@@ -146,7 +146,7 @@ export class AuthController {
       },
     },
   })
-  @ResponeMessage('Password has been successfully reset.')
+  @ResponeMessage(RESPONSE_MESSAGE.PASSWORD_HAS_BEEN_SUCCESSFULLY_RESET)
   async handleVerifyForgotPasswod(
     @Body('forgot_password_token') forgot_password_token: string,
     @Body('password') password: string,

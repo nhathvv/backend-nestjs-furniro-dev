@@ -1,45 +1,61 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { AWSConfig } from 'src/configs/aws.cnf';
+import { ERROR_MESSAGES } from 'src/constants/message';
 
 @Injectable()
 export class FileUploadService {
-  handleFileUpload(file: Express.Multer.File) {
+  constructor(
+    private readonly logger : Logger,
+  
+  ) {}
+  bucketName = AWSConfig.config.AWS_S3_BUCKET_NAME;
+  region = AWSConfig.config.AWS_S3_REGION
+  s3Client = new S3Client({
+    region: this.region,
+    credentials: {
+      accessKeyId: AWSConfig.config.AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWSConfig.config.AWS_SECRET_ACCESS_KEY,
+    },
+  });
+
+  async uploadFile(path: string, file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('no file uploaded');
+      throw new BadRequestException(ERROR_MESSAGES.NO_FILE_UPLOAD);
     }
 
-    // validate file type
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-    if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException('invalid file type');
-    }
+    const fileName = `${path}/${Date.now()}-${file.originalname}`;
+    const encodedFileName = encodeURIComponent(fileName);
+    const filePath = `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${encodedFileName}`;
+    try {
+      const upload = new Upload({
+        client: this.s3Client,
+        params: {
+          Bucket: this.bucketName,
+          Key: fileName,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+        },
+      });
 
-    // validate file size (e.g., max 5mb)
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      throw new BadRequestException('file is too large!');
+      await upload.done();
+      return {filePath};
+    } catch (error) {
+      this.logger.error(`[FAILED UPLOAD FILE]::`, error)
+      throw error;
     }
-
-    return { filePath: file.path };
   }
-  async uploadFiles(files: Express.Multer.File[]) {
+  async uploadMultipleFiles(path: string, files: Express.Multer.File[]) {
     if (!files || files.length === 0) {
-      throw new BadRequestException('no file uploaded');
+      throw new BadRequestException(ERROR_MESSAGES.NO_FILE_UPLOAD);
     }
-
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-    const maxSize = 5 * 1024 * 1024;
-    const result = [];
-
+    const filePaths = [];
     for (const file of files) {
-      if (!allowedMimeTypes.includes(file.mimetype)) {
-        throw new BadRequestException('invalid file type');
-      }
-
-      if (file.size > maxSize) {
-        throw new BadRequestException('file is too large!');
-      }
-      result.push(file.path);
+      const result = await this.uploadFile(path, file);
+      filePaths.push(result.filePath);
     }
-    return { filePath: result };
+    return { filePaths };
   }
 }

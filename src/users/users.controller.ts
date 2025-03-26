@@ -19,14 +19,14 @@ import { BanDuration } from 'src/constants/enum';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponeMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
-
+import { RESPONSE_MESSAGE } from 'src/constants/message';
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @ResponeMessage('User created successfully')
+  @ResponeMessage(RESPONSE_MESSAGE.USER_CREATED_SUCCESSFULLY)
   @ApiBody({
     schema: {
       type: 'object',
@@ -59,7 +59,7 @@ export class UsersController {
   }
 
   @Get()
-  @ResponeMessage('Get all users success')
+  @ResponeMessage(RESPONSE_MESSAGE.GET_ALL_USERS_SUCCESS)
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
@@ -69,13 +69,13 @@ export class UsersController {
   }
 
   @Get(':id')
-  @ResponeMessage('Get user by id success')
+  @ResponeMessage(RESPONSE_MESSAGE.GET_USER_BY_ID_SUCCESS)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  @ResponeMessage('User updated successfully')
+  @ResponeMessage(RESPONSE_MESSAGE.USER_UPDATED_SUCCESSFULLY)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   update(
@@ -87,7 +87,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @ResponeMessage('User deleted successfully')
+  @ResponeMessage(RESPONSE_MESSAGE.USER_DELETED_SUCCESSFULLY)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   remove(@Param('id') id: string, @User() user: IUser) {
@@ -112,7 +112,7 @@ export class UsersController {
       },
     },
   })
-  @ResponeMessage('User banned successfully')
+  @ResponeMessage(RESPONSE_MESSAGE.USER_BANNED_SUCCESSFULLY)
   async banUser(
     @Param('id') userId: string,
     @Body() body: { reason: string; duration: BanDuration },
@@ -122,7 +122,7 @@ export class UsersController {
   @Put('unbanned/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @ResponeMessage('User unbanned successfully')
+  @ResponeMessage(RESPONSE_MESSAGE.USER_UNBANNED_SUCCESSFULLY)
   async unbanUser(@Param('id') userId: string) {
     return this.usersService.unbanUser(userId);
   }

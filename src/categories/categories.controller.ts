@@ -16,7 +16,7 @@ import { Public, ResponeMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-
+import { RESPONSE_MESSAGE } from 'src/constants/message';
 @ApiTags('Categories')
 @Controller('categories')
 export class CategoriesController {
@@ -24,7 +24,7 @@ export class CategoriesController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  @ResponeMessage('Create category success')
+  @ResponeMessage(RESPONSE_MESSAGE.CREATE_CATEGORY_SUCCESS)
   @ApiBody({
     schema: {
       type: 'object',
@@ -47,7 +47,7 @@ export class CategoriesController {
 
   @Public()
   @Get()
-  @ResponeMessage('Get all categories success')
+  @ResponeMessage(RESPONSE_MESSAGE.GET_ALL_CATEGORIES_SUCCESS)
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
@@ -57,7 +57,7 @@ export class CategoriesController {
   }
 
   @Get(':id')
-  @ResponeMessage('Get category by id success')
+  @ResponeMessage(RESPONSE_MESSAGE.GET_CATEGORY_BY_ID_SUCCESS)
   @Public()
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(id);
@@ -66,7 +66,7 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiBearerAuth('access-token')
-  @ResponeMessage('Update category success')
+  @ResponeMessage(RESPONSE_MESSAGE.UPDATE_CATEGORY_SUCCESS)
   update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -76,7 +76,7 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @ResponeMessage('Delete category success')
+  @ResponeMessage(RESPONSE_MESSAGE.DELETE_CATEGORY_SUCCESS)
   @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string, @User() user: IUser) {

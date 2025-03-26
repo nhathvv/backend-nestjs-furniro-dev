@@ -17,7 +17,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { IUser } from 'src/users/users.interface';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { ProductResponse } from 'src/products/products.response';
-
+import { RESPONSE_MESSAGE } from 'src/constants/message';
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
@@ -25,7 +25,7 @@ export class ProductsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @ResponeMessage('Product created successfully')
+  @ResponeMessage(RESPONSE_MESSAGE.PRODUCT_CREATED_SUCCESSFULLY)
   @ApiBody({
     schema: {
       type: 'object',
@@ -87,7 +87,7 @@ export class ProductsController {
 
   @Get()
   @Public()
-  @ResponeMessage('Fetch all products by pagination')
+  @ResponeMessage(RESPONSE_MESSAGE.FETCH_ALL_PRODUCTS_BY_PAGINATION)
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
@@ -97,7 +97,7 @@ export class ProductsController {
   }
   @Get('search')
   @Public()
-  @ResponeMessage('Search product by keyword')
+  @ResponeMessage(RESPONSE_MESSAGE.SEARCH_PRODUCT_BY_KEYWORD)
   async searchProducts(
     @Query('keyword') keyword: string,
     @Query('current') currentPage: string,
@@ -109,7 +109,7 @@ export class ProductsController {
 
   @Get(':id')
   @Public()
-  @ResponeMessage("Get product's detail")
+  @ResponeMessage(RESPONSE_MESSAGE.GET_PRODUCT_DETAIL)
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
   }
@@ -127,7 +127,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @ResponeMessage('Product deleted successfully')
+  @ResponeMessage(RESPONSE_MESSAGE.PRODUCT_DELETED_SUCCESSFULLY)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   remove(@Param('id') id: string, @User() user: IUser) {

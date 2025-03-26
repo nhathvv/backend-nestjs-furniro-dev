@@ -11,11 +11,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const reflector = app.get(Reflector);
-  app.useStaticAssets(join(__dirname, '..', 'public'), {
-    prefix: '/public/',
-  });
-
-  console.log(join(__dirname, '..', 'public'));
   const configService = app.get(ConfigService);
   app.enableCors({
     origin: true,
@@ -34,7 +29,6 @@ async function bootstrap() {
     })
     .setGlobalPrefix('api');
 
-  // Swagger
   const config = new DocumentBuilder()
     .setTitle('Furniro dev | API')
     .setDescription('The NestJS Auth API description')
