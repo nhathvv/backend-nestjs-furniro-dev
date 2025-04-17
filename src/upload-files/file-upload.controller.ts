@@ -13,7 +13,7 @@ import { FileUploadService } from './file-upload.service';
 import { ResponeMessage } from 'src/decorator/customize';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
-import { FOLDER_S3_UPLOAD, MAX_NUMBER_OF_FILES } from 'src/constants/s3.constants';
+import { FOLDER_S3_UPLOAD, MAX_FILE_SIZE, MAX_NUMBER_OF_FILES } from 'src/constants/constants';
 import { RESPONSE_MESSAGE } from 'src/constants/message';
 @Controller('file-upload')
 export class FileUploadController {
@@ -56,9 +56,12 @@ export class FileUploadController {
     schema: {
       type: 'object',
       properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
         },
       },
     },
@@ -69,7 +72,7 @@ export class FileUploadController {
   uploadMultipleFiles(@UploadedFiles(
     new ParseFilePipe({
       validators: [
-        new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
+        new MaxFileSizeValidator({ maxSize: MAX_FILE_SIZE }),
         new FileTypeValidator({
           fileType: /(image\/jpeg|image\/png|image\/webp)$/,
         }),

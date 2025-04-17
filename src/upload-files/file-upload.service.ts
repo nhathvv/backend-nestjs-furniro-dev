@@ -1,16 +1,13 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { AWSConfig } from 'src/configs/aws.cnf';
 import { ERROR_MESSAGES } from 'src/constants/message';
 
 @Injectable()
 export class FileUploadService {
   constructor(
-    private readonly logger : Logger,
-  
-  ) {}
+    private readonly logger : Logger) {}
   bucketName = AWSConfig.config.AWS_S3_BUCKET_NAME;
   region = AWSConfig.config.AWS_S3_REGION
   s3Client = new S3Client({
@@ -51,11 +48,7 @@ export class FileUploadService {
     if (!files || files.length === 0) {
       throw new BadRequestException(ERROR_MESSAGES.NO_FILE_UPLOAD);
     }
-    const filePaths = [];
-    for (const file of files) {
-      const result = await this.uploadFile(path, file);
-      filePaths.push(result.filePath);
-    }
+    const filePaths = await Promise.all(files.map(file => this.uploadFile(path, file)))
     return { filePaths };
   }
 }
