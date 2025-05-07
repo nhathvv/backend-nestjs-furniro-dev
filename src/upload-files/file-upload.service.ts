@@ -48,7 +48,8 @@ export class FileUploadService {
     if (!files || files.length === 0) {
       throw new BadRequestException(ERROR_MESSAGES.NO_FILE_UPLOAD);
     }
-    const filePaths = await Promise.all(files.map(file => this.uploadFile(path, file)))
+    const uploadResults = await Promise.all(files.map(file => this.uploadFile(path, file)));
+    const filePaths = uploadResults.map(result => result.filePath);
     return { filePaths };
   }
 }
