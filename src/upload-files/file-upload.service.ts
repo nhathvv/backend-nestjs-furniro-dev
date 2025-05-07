@@ -10,6 +10,7 @@ export class FileUploadService {
     private readonly logger : Logger) {}
   bucketName = AWSConfig.config.AWS_S3_BUCKET_NAME;
   region = AWSConfig.config.AWS_S3_REGION
+  cloudFrontDomain = AWSConfig.config.AWS_CLOUDFRONT_DOMAIN
   s3Client = new S3Client({
     region: this.region,
     credentials: {
@@ -25,7 +26,7 @@ export class FileUploadService {
 
     const fileName = `${path}/${Date.now()}-${file.originalname}`;
     const encodedFileName = encodeURIComponent(fileName);
-    const filePath = `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${encodedFileName}`;
+    const filePath = `https://${this.cloudFrontDomain}/${encodedFileName}`;
     try {
       const upload = new Upload({
         client: this.s3Client,
