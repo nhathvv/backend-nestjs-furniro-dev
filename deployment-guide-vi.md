@@ -1,4 +1,4 @@
-# Hướng dẫn Triển khai Ứng dụng NestJS Furniro
+# Furniro-dev
 
 Hướng dẫn này mô tả chi tiết quy trình triển khai ứng dụng NestJS Furniro trên EC2 của AWS, bao gồm thiết lập Nginx, SSL/HTTPS, cấu hình tên miền, lưu trữ S3 và CI/CD với GitHub Actions.
 
@@ -6,13 +6,14 @@ Hướng dẫn này mô tả chi tiết quy trình triển khai ứng dụng Nes
 1. [Thiết lập AWS EC2 Instance](#thiết-lập-aws-ec2-instance)
 2. [Cấu hình Tường lửa](#cấu-hình-tường-lửa)
 3. [Thiết lập S3 Bucket cho Lưu trữ File](#thiết-lập-s3-bucket-cho-lưu-trữ-file)
-4. [Cài đặt Phần mềm Cần thiết trên EC2](#cài-đặt-phần-mềm-cần-thiết-trên-ec2)
-5. [Triển khai Ứng dụng trên EC2](#triển-khai-ứng-dụng-trên-ec2)
-6. [Cấu hình Nginx làm Reverse Proxy](#cấu-hình-nginx-làm-reverse-proxy)
-7. [Cấu hình Tên miền](#cấu-hình-tên-miền)
-8. [Cấu hình SSL/HTTPS với Certbot](#cấu-hình-sslhttps-với-certbot)
-9. [Cấu hình CI/CD với GitHub Actions](#cấu-hình-cicd-với-github-actions)
-10. [Cập nhật và Bảo trì](#cập-nhật-và-bảo-trì)
+4. [Thiết lập CloudFront với Origin S3 Bucket](#thiết-lập-cloudfront-với-origin-s3-bucket)
+5. [Cài đặt Phần mềm Cần thiết trên EC2](#cài-đặt-phần-mềm-cần-thiết-trên-ec2)
+6. [Triển khai Ứng dụng trên EC2](#triển-khai-ứng-dụng-trên-ec2)
+7. [Cấu hình Nginx làm Reverse Proxy](#cấu-hình-nginx-làm-reverse-proxy)
+8. [Cấu hình Tên miền](#cấu-hình-tên-miền)
+9. [Cấu hình SSL/HTTPS với Certbot](#cấu-hình-sslhttps-với-certbot)
+10. [Cấu hình CI/CD với GitHub Actions](#cấu-hình-cicd-với-github-actions)
+11. [Cập nhật và Bảo trì](#cập-nhật-và-bảo-trì)
 
 ## Thiết lập AWS EC2 Instance
 
@@ -131,6 +132,80 @@ AWS_S3_ACCESS_KEY=access-key-của-bạn
 AWS_S3_SECRET_KEY=secret-key-của-bạn
 AWS_S3_BUCKET=tên-bucket-của-bạn
 ```
+
+> **Lưu ý**: Để cải thiện hiệu suất, bảo mật và giảm chi phí cho việc phân phối nội dung từ S3, bạn có thể thiết lập CloudFront CDN với S3 làm origin. Xem chi tiết tại phần [Thiết lập CloudFront với Origin S3 Bucket](#thiết-lập-cloudfront-với-origin-s3-bucket).
+
+## Thiết lập CloudFront với Origin S3 Bucket
+
+### Tạo CloudFront Distribution
+1. Đăng nhập vào AWS Management Console
+2. Chuyển đến dịch vụ CloudFront
+3. Nhấp vào "Create Distribution"
+4. Chọn S3 bucket của bạn làm Origin Domain
+5. Cấu hình các thiết lập sau:
+   - Restrict Bucket Access: Yes (để hạn chế truy cập trực tiếp vào bucket)
+   - Origin Access Identity: Create a New Identity
+   - Grant Read Permissions on Bucket: Yes, Update Bucket Policy
+   - Viewer Protocol Policy: Redirect HTTP to HTTPS (khuyến nghị)
+   - Allowed HTTP Methods: GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE (tùy theo nhu cầu)
+   - Cache Policy: Chọn hoặc tạo policy phù hợp với loại nội dung của bạn
+   - Price Class: Chọn phù hợp với ngân sách (Use Only US, Canada and Europe cho chi phí thấp nhất)
+   - Alternate Domain Names (CNAMEs): Thêm tên miền tùy chỉnh nếu cần
+   - SSL Certificate: Chọn Default CloudFront Certificate hoặc sử dụng chứng chỉ tùy chỉnh
+
+### Cấu hình CORS cho S3 Bucket
+Nếu bạn cần hỗ trợ CORS, cấu hình chính sách CORS cho S3 bucket của bạn:
+1. Đi đến S3 bucket của bạn
+2. Chọn tab "Permissions"
+3. Cuộn xuống đến phần "Cross-origin resource sharing (CORS)"
+4. Chọn "Edit" và thêm chính sách CORS phù hợp:
+
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+    "AllowedOrigins": ["*"],
+    "ExposeHeaders": ["ETag"]
+  }
+]
+```
+
+### Cấu hình Tên miền Tùy chỉnh cho CloudFront (nếu cần)
+1. Tạo chứng chỉ SSL/TLS trong AWS Certificate Manager (ACM) cho tên miền của bạn
+2. Thêm tên miền tùy chỉnh vào CloudFront distribution
+3. Chọn chứng chỉ SSL/TLS đã tạo
+4. Cập nhật DNS của tên miền của bạn để trỏ đến CloudFront domain (tạo bản ghi CNAME)
+
+| Tên record (Host) | Type | Value | TTL |
+|-------------------|------|-------|-----|
+| cdn | CNAME | your-distribution-id.cloudfront.net | 300 |
+
+### Cập nhật File .env với Cấu hình CloudFront
+Cập nhật file .env của bạn để sử dụng CloudFront URL thay vì URL S3 trực tiếp:
+```
+AWS_CLOUDFRONT_URL=https://your-distribution-id.cloudfront.net
+# hoặc nếu sử dụng tên miền tùy chỉnh
+AWS_CLOUDFRONT_URL=https://cdn.your-domain.com
+```
+
+### Cập nhật Mã Ứng dụng để Sử dụng CloudFront
+Đảm bảo ứng dụng của bạn sử dụng URL CloudFront cho các tài nguyên lưu trữ trong S3. Ví dụ, khi tạo URL cho tệp đã tải lên:
+
+```typescript
+// Thay vì tạo URL S3 trực tiếp
+const fileUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${fileName}`;
+
+// Sử dụng URL CloudFront
+const fileUrl = `${process.env.AWS_CLOUDFRONT_URL}/${fileName}`;
+```
+
+### Lợi ích của việc sử dụng CloudFront
+1. **Hiệu suất cải thiện**: Nội dung được phân phối từ edge location gần nhất với người dùng
+2. **Bảo mật nâng cao**: Truy cập trực tiếp vào S3 bucket bị chặn, tất cả yêu cầu phải đi qua CloudFront
+3. **Chi phí truyền dữ liệu thấp hơn**: Giá cước truyền dữ liệu từ CloudFront thường thấp hơn từ S3 trực tiếp
+4. **Giảm tải cho origin server**: CloudFront cache giúp giảm số lượng yêu cầu đến S3 bucket
+5. **HTTPS miễn phí**: AWS cung cấp chứng chỉ SSL/TLS miễn phí cho CloudFront distributions
 
 ## Cài đặt Phần mềm Cần thiết trên EC2
 
