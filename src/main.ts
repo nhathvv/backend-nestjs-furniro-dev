@@ -30,7 +30,7 @@ async function bootstrap() {
     .setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
-    .setTitle('Furniro dev | API')
+    .setTitle('Furniro Development | API')
     .setDescription('The NestJS Auth API description')
     .setVersion('1.0')
     .addBearerAuth(
